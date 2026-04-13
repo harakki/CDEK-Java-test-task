@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: cdek_task_time_tracker
