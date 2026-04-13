@@ -2,6 +2,10 @@ spring:
   application:
     name: cdek_task_time_tracker
 
+  docker:
+    compose:
+      file: src/main/docker/compose.yaml
+
   datasource:
     url: jdbc:postgresql://localhost:5432/cdek_task_time_tracker?stringtype=unspecified
     username: myuser
