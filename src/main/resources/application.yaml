@@ -1,3 +1,17 @@
 spring:
   application:
     name: cdek_task_time_tracker
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cdek_task_time_tracker?stringtype=unspecified
+    username: myuser
+    password: secret
+    driver-class-name: org.postgresql.Driver
+
+  sql:
+    init:
+      mode: always
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
