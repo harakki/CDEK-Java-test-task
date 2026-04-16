@@ -1,0 +1,111 @@
+@baseUrl = http://localhost:8080
+@employeeId = 1
+
+### Создать задание 1
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "name": "Задание 1",
+  "description": "Это задание 1",
+  "status": "NEW"
+}
+
+> {%
+    client.test("Task created", function () {
+        client.assert(response.status === 200 || response.status === 201, "Task not created");
+    });
+    client.global.set("task_1_id", response.body.id);
+%}
+
+### Получить задание 1
+GET {{baseUrl}}/api/v1/tasks/{{task_1_id}}
+
+> {%
+    client.test("Task fetched", function () {
+        client.assert(response.status === 200, "Task not found");
+    });
+%}
+
+### Изменить статус задания 1 на IN_PROGRESS
+PATCH {{baseUrl}}/api/v1/tasks/{{task_1_id}}/status
+Content-Type: application/json
+
+{
+  "status": "IN_PROGRESS"
+}
+
+> {%
+    client.test("Status updated", function () {
+        client.assert(response.status === 200, "Status not updated");
+    });
+%}
+
+### Получить задание 1 (проверка статуса)
+GET {{baseUrl}}/api/v1/tasks/{{task_1_id}}
+
+> {%
+    client.test("Status is IN_PROGRESS", function () {
+        client.assert(response.body.status === "IN_PROGRESS", "Wrong status");
+    });
+%}
+
+### Создать запись о времени
+< {%
+    const now = new Date();
+
+    const start = new Date(now.getTime() - 4 * 60 * 60 * 1000);
+    const end = new Date(now.getTime() - 1 * 60 * 60 * 1000);
+
+    client.global.set("start_time", start.toISOString());
+    client.global.set("end_time", end.toISOString());
+%}
+
+POST {{baseUrl}}/api/v1/time-records
+Content-Type: application/json
+
+{
+  "employeeId": {{employeeId}},
+  "taskId": {{task_1_id}},
+  "startTime": "{{start_time}}",
+  "endTime": "{{end_time}}",
+  "workDescription": "Начал работу"
+}
+
+> {%
+    client.test("Time record created", function () {
+        client.assert(response.status === 200 || response.status === 201, "Time record not created");
+    });
+    client.global.set("time_record_id", response.body.id);
+%}
+
+### Получить записи сотрудника за период
+< {%
+    const now = new Date();
+
+    const start = new Date(now.getTime() - 5 * 60 * 60 * 1000);
+    const end = new Date(now.getTime());
+
+    client.global.set("start_time", start.toISOString());
+    client.global.set("end_time", end.toISOString());
+%}
+
+GET {{baseUrl}}/api/v1/time-records/employees/{{employeeId}}?
+    startDate={{start_time}}&
+    endDate={{end_time}}
+
+> {%
+    client.test("Time records fetched", function () {
+        client.assert(response.status === 200, "Failed to fetch time records");
+        client.assert(response.body.totalTimeSpentSeconds === 10800, "Total time spent is incorrect");
+    });
+%}
+
+### Получить запись по ID
+GET {{baseUrl}}/api/v1/time-records/{{time_record_id}}
+
+> {%
+    client.test("Time record fetched", function () {
+        client.assert(response.status === 200, "Time record not found");
+    });
+%}
