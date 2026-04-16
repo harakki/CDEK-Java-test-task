@@ -2,6 +2,10 @@ spring:
   application:
     name: cdek_task_time_tracker
 
+  mvc:
+    problemdetails:
+      enabled: true
+
   docker:
     compose:
       file: src/main/docker/compose.yaml

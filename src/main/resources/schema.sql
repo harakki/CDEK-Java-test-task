@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS task
     description TEXT,
     status      VARCHAR NOT NULL,
     created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_deleted  BOOLEAN                  DEFAULT FALSE
 );
 
 CREATE INDEX IF NOT EXISTS idx_task_name ON task (name);
@@ -21,6 +22,7 @@ CREATE TABLE IF NOT EXISTS time_record
     work_description TEXT,
     created_at       TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_deleted       BOOLEAN                  DEFAULT FALSE,
 
     CONSTRAINT fk_time_record_task_id FOREIGN KEY (task_id) REFERENCES task (id) ON DELETE CASCADE,
     CONSTRAINT chk_time_record_time_range CHECK (end_time > start_time)
