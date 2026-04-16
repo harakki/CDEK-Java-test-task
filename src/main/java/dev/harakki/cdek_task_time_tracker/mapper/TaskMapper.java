@@ -9,14 +9,20 @@ import java.util.Optional;
 @Mapper
 public interface TaskMapper {
 
-    @Insert("INSERT INTO task (name, description, status, created_at, updated_at) VALUES (#{name}, #{description}, #{status}, #{createdAt}, #{updatedAt})")
+    @Insert("INSERT INTO task (name, description, status, created_at, updated_at) VALUES (#{name}, #{description}, #{status}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     void insert(Task task);
 
-    @Select("SELECT * FROM task WHERE id = #{id}")
+    @Select("SELECT * FROM task WHERE id = #{id} AND is_deleted = FALSE")
     Optional<Task> findById(Long id);
+
+    @Update("UPDATE task SET name = #{name}, description = #{description}, status = #{status}, updated_at = CURRENT_TIMESTAMP WHERE id = #{id}")
+    void update(Task task);
 
     @Update("UPDATE task SET status = #{status}, updated_at = CURRENT_TIMESTAMP WHERE id = #{id}")
     void updateStatus(@Param("id") Long id, @Param("status") TaskStatus status);
+
+    @Update("UPDATE task SET is_deleted = TRUE, updated_at = CURRENT_TIMESTAMP WHERE id = #{id}")
+    void delete(@Param("id") Long taskId);
 
 }
