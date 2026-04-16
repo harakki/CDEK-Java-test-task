@@ -10,6 +10,7 @@ class CdekTaskTimeTrackerApplicationTests {
 
     @Test
     void contextLoads() {
+        // Тест на поднятие контекста
     }
 
 }
