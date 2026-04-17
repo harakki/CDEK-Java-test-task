@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -85,6 +86,32 @@ class TimeRecordControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.title").value("Bad Request"))
                 .andExpect(jsonPath("$.detail").value("Invalid request content."));
+    }
+
+    @Test
+    void createShouldReturnBadRequestWhenTimeRangeConstraintIsViolated() throws Exception {
+        var ex = new DataIntegrityViolationException(
+                "constraint violation",
+                new RuntimeException("ERROR: violates check constraint \"chk_time_record_time_range\"")
+        );
+
+        when(timeRecordService.create(any(TimeRecordCreateRequest.class))).thenThrow(ex);
+
+        mockMvc.perform(post("/api/v1/time-records")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "employeeId": 77,
+                                  "taskId": 5,
+                                  "startTime": "2026-04-16T09:00:00Z",
+                                  "endTime": "2026-04-16T09:00:00Z",
+                                  "workDescription": "Implemented tests"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("End time must be after start time"));
     }
 
     @Test

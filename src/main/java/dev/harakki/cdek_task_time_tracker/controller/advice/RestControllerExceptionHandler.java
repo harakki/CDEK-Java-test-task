@@ -2,6 +2,7 @@ package dev.harakki.cdek_task_time_tracker.controller.advice;
 
 import dev.harakki.cdek_task_time_tracker.exception.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -69,6 +70,22 @@ class RestControllerExceptionHandler {
     public ProblemDetail handleTypeMismatchAndMissingParams(Exception ex) {
         var problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
         problemDetail.setTitle("Invalid Request Parameter");
+        problemDetail.setProperty("timestamp", java.time.Instant.now());
+        return problemDetail;
+    }
+
+    // DB constraint violations -> 400 Bad Request
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        String detail = "Request violates data integrity constraints";
+        String message = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
+
+        if (message != null && message.contains("chk_time_record_time_range")) {
+            detail = "End time must be after start time";
+        }
+
+        var problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+        problemDetail.setTitle("Bad Request");
         problemDetail.setProperty("timestamp", java.time.Instant.now());
         return problemDetail;
     }

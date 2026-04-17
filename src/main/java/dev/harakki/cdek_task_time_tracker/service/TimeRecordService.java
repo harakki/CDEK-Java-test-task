@@ -25,8 +25,8 @@ public class TimeRecordService {
     private final TaskService taskService;
 
     public TimeRecordResponse create(TimeRecordCreateRequest request) {
-        if (request.endTime().isBefore(request.startTime())) {
-            throw new IllegalArgumentException("End time cannot be before start time");
+        if (!request.endTime().isAfter(request.startTime())) {
+            throw new IllegalArgumentException("End time must be after start time");
         }
 
         // TODO check employeeId is exists (например, отправить запрос на другой сервис)

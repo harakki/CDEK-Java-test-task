@@ -67,7 +67,19 @@ class TimeRecordServiceTest {
 
         var exception = assertThrows(IllegalArgumentException.class, () -> timeRecordService.create(request));
 
-        assertEquals("End time cannot be before start time", exception.getMessage());
+        assertEquals("End time must be after start time", exception.getMessage());
+        verifyNoInteractions(taskService, timeRecordMapper, mapstructMapper);
+    }
+
+    @Test
+    void createShouldThrowWhenEndEqualsStart() {
+        var start = Instant.parse("2026-04-15T12:00:00Z");
+        var end = Instant.parse("2026-04-15T12:00:00Z");
+        var request = new TimeRecordCreateRequest(5L, 7L, start, end, "Work");
+
+        var exception = assertThrows(IllegalArgumentException.class, () -> timeRecordService.create(request));
+
+        assertEquals("End time must be after start time", exception.getMessage());
         verifyNoInteractions(taskService, timeRecordMapper, mapstructMapper);
     }
 
