@@ -1,0 +1,48 @@
+@baseUrl = http://localhost:8080
+@employeeId = 1
+@recordStartTime = 2026-04-01T00:00:00Z
+@reportStartTime = 2026-03-01T00:00:00Z
+
+### Создать задание 1
+# @name createTask
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "name": "Задание 1",
+  "description": "Это задание 1",
+  "status": "NEW"
+}
+
+### Получить задание 1
+GET {{baseUrl}}/api/v1/tasks/{{createTask.response.body.id}}
+
+### Изменить статус задания 1 на IN_PROGRESS
+PATCH {{baseUrl}}/api/v1/tasks/{{createTask.response.body.id}}/status
+Content-Type: application/json
+
+{
+  "status": "IN_PROGRESS"
+}
+
+### Получить задание 1 (проверка статуса)
+GET {{baseUrl}}/api/v1/tasks/{{createTask.response.body.id}}
+
+### Создать запись о времени
+# @name createTimeRecord
+POST {{baseUrl}}/api/v1/time-records
+Content-Type: application/json
+
+{
+  "employeeId": {{employeeId}},
+  "taskId": {{createTask.response.body.id}},
+  "startTime": "{{recordStartTime}}",
+  "endTime": "{{$datetime iso8601}}",
+  "workDescription": "Начал работу"
+}
+
+### Получить записи сотрудника за период
+GET {{baseUrl}}/api/v1/time-records/employees/{{employeeId}}?startDate={{reportStartTime}}&endDate={{$datetime iso8601}}
+
+### Получить запись по ID
+GET {{baseUrl}}/api/v1/time-records/{{createTimeRecord.response.body.id}}
